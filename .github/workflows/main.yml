@@ -49,12 +49,29 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Pastikan Docker diinstal di instance EC2
-            which docker || echo "Docker is not installed or not found in PATH."
+            # Memeriksa ketersediaan Docker
+            if ! command -v docker &> /dev/null; then
+              echo "Docker tidak ditemukan atau tidak terinstal."
+              exit 1
+            fi
 
-            # Jalankan perintah
-            cd /home || echo "Directory not found."
-            docker-compose down || echo "Failed to stop previous containers."
-            docker pull faqihazh/alta:latest || echo "Failed to pull latest image."
-            docker run -d -p 1323:1323 faqihazh/alta:latest || echo "Failed to run container."
-            docker-compose up -d || echo "Failed to start containers."
+            # Memeriksa ketersediaan Docker Compose
+            if ! command -v docker-compose &> /dev/null; then
+              echo "Docker Compose tidak ditemukan atau tidak terinstal."
+              exit 1
+            fi
+
+            # Menavigasi ke direktori aplikasi
+            cd /home || (echo "Direktori tidak ditemukan." && exit 1)
+
+            # Menghentikan kontainer sebelumnya
+            docker-compose down || echo "Gagal menghentikan kontainer sebelumnya."
+
+            # Menarik gambar terbaru
+            docker pull faqihazh/alta:latest || echo "Gagal menarik gambar terbaru."
+
+            # Menjalankan kontainer baru
+            docker run -d -p 1323:1323 faqihazh/alta:latest || echo "Gagal menjalankan kontainer baru."
+
+            # Menjalankan layanan menggunakan Docker Compose
+            docker-compose up -d || echo "Gagal menjalankan layanan."
