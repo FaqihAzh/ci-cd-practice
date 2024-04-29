@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/ec2-user/alta
+            cd /home
             # docker compose down
             docker pull faqihazh/alta:latest
             docker run -d -p 1323:1323 faqihazh/alta:latest
